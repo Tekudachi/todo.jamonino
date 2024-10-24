@@ -8,7 +8,7 @@
 <body>
 
     <label for="content">Nueva tarea</label>
-    <input type="text" id="content" placeholder="Ingresa una tarea"><br>
+    <input type="text" id="content" placeholder="Ingresa una tarea..."><br>
     <button id="guardar">Guardar</button>
 
     <h2 id="lista">TODO</h2>
