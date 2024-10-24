@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List actualizable mediante botón</title>
+</head>
+<body>
+
+    <label for="content">Nueva tarea</label>
+    <input type="text" id="content" placeholder="Ingresa una tarea"><br>
+    <button id="guardar">Guardar</button>
+
+    <h2 id="lista">TODO</h2>
+    <ol id="todo-list">
+        <?php
+        require "DB.php";
+        require "todo.php";
+
+        try {
+            $db = new DB;
+            $todo_list = Todo::DB_selectAll($db->connection);
+            foreach ($todo_list as $row) {
+                // Mostrar solo el contenido, sin el item_id
+                echo "<li>" . htmlspecialchars($row->getContent()) . "</li>";
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage() . "<br/>";
+            die();
+        }
+        ?>
+    </ol>
+
+    <script>
+        document.getElementById('guardar').addEventListener('click', function () {
+            const content = document.getElementById('content').value;
+
+            if (!content) {
+                alert('Por favor, introduce un valor.');
+                return;
+            }
+
+            const url = 'http://www.vh5.lan/controller.php';  
+
+            const postData = {
+                content: content
+            };
+
+            // Llamada POST
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            })
+            .then(response => response.json())  // Convertir la respuesta a JSON
+            .then(data => {
+                // Limpiar la lista antes de agregar los nuevos datos
+                const lista = document.getElementById('todo-list');
+                lista.innerHTML = ''; // Eliminar el contenido previo de la lista
+
+                // La respuesta es un array de objetos JSON
+                data.forEach(item => {
+                    var li = document.createElement("li");
+                    // Mostrar solo el contenido
+                    li.appendChild(document.createTextNode(item.content));
+                    lista.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error en la solicitud POST:', error));
+        });
+    </script>
+
+</body>
+</html>
+
