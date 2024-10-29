@@ -37,7 +37,9 @@
                         $db = new DB;
                         $todo_list = Todo::DB_selectAll($db->connection);
                         foreach ($todo_list as $row) {
-                            echo "<li class='list-group-item'>" . htmlspecialchars($row->getContent()) . "</li>";
+                            echo "<li class='list-group-item d-flex justify-content-between align-items-center'>"
+                                . htmlspecialchars($row->getContent()) .
+                                "<button class='btn btn-danger btn-sm delete-btn' data-id='" . $row->getItem_id() . "'>Eliminar</button></li>";
                         }
                     } catch (PDOException $e) {
                         print "Error!: " . $e->getMessage() . "<br/>";
@@ -63,33 +65,28 @@
                 return;
             }
 
-            const url = 'http://www.vh5.lan/controller.php';  // Asegúrate de que la URL esté correcta y que el servidor PHP esté configurado
-            const postData = {
-                content: content
-            };
+            const url = 'http://www.vh6.lan/controller.php';
+            const postData = { content: content };
 
-            // Llamada POST usando fetch
             fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(postData)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.length > 0) {
                     const lista = document.getElementById('todo-list');
-                    lista.innerHTML = '';  // Limpiar la lista antes de agregar nuevos elementos
+                    lista.innerHTML = '';
 
                     data.forEach(item => {
                         var li = document.createElement("li");
-                        li.classList.add('list-group-item');
-                        li.appendChild(document.createTextNode(item.content));  // Solo mostrar el contenido
+                        li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                        li.innerHTML = item.content + 
+                            "<button class='btn btn-danger btn-sm delete-btn' data-id='" + item.item_id + "'>Eliminar</button>";
                         lista.appendChild(li);
                     });
 
-                    // Limpiar el campo de texto
                     document.getElementById('content').value = '';
                 } else {
                     console.error('No se recibieron datos');
@@ -97,8 +94,36 @@
             })
             .catch(error => console.error('Error en la solicitud POST:', error));
         });
+
+        document.getElementById('todo-list').addEventListener('click', function (e) {
+            if (e.target.classList.contains('delete-btn')) {
+                const itemId = e.target.getAttribute('data-id');
+                const url = 'http://www.vh6.lan/controller.php';
+
+                fetch(url + '?id=' + itemId, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const lista = document.getElementById('todo-list');
+                        lista.innerHTML = '';
+
+                        data.todo_list.forEach(item => {
+                            var li = document.createElement("li");
+                            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                            li.innerHTML = item.content + 
+                                "<button class='btn btn-danger btn-sm delete-btn' data-id='" + item.item_id + "'>Eliminar</button>";
+                            lista.appendChild(li);
+                        });
+                    } else {
+                        console.error('No se pudo eliminar la tarea');
+                    }
+                })
+                .catch(error => console.error('Error en la solicitud DELETE:', error));
+            }
+        });
     </script>
 
 </body>
 </html>
-

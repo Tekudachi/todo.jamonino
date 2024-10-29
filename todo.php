@@ -29,7 +29,6 @@ class Todo implements \JsonSerializable {
         return $this->item_id;
     }
 
-    // Devuelve todos los elementos de la BBDD en forma de array
     public static function DB_selectAll($dbconn){
         $todo_list = array();
         foreach($dbconn->query("SELECT item_id, content FROM todo_list") as $row) {
@@ -40,11 +39,17 @@ class Todo implements \JsonSerializable {
         return $todo_list;
     }
 
-    // Método para insertar una nueva tarea
     public function insert($dbconn) {
         $sql = "INSERT INTO todo_list (content) VALUES (:content)";
         $stmt = $dbconn->prepare($sql);
         $stmt->bindParam(':content', $this->content);
-        return $stmt->execute();  // Ejecuta la inserción
+        return $stmt->execute();
+    }
+
+    public function delete($dbconn, $item_id) {
+        $sql = "DELETE FROM todo_list WHERE item_id = :item_id";
+        $stmt = $dbconn->prepare($sql);
+        $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 }
