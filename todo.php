@@ -1,7 +1,5 @@
 <?php
-
 class Todo implements \JsonSerializable {
-
     private int $item_id;
     private string $content;
 
@@ -21,11 +19,11 @@ class Todo implements \JsonSerializable {
         return $vars;
     }
 
-    public function getContent(){       
-        return $this->content;  
+    public function getContent(){
+        return $this->content;
     }
 
-    public function getItem_id(){       
+    public function getItem_id(){
         return $this->item_id;
     }
 
@@ -49,6 +47,14 @@ class Todo implements \JsonSerializable {
     public function delete($dbconn, $item_id) {
         $sql = "DELETE FROM todo_list WHERE item_id = :item_id";
         $stmt = $dbconn->prepare($sql);
+        $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function update($dbconn, $item_id) {
+        $sql = "UPDATE todo_list SET content = :content WHERE item_id = :item_id";
+        $stmt = $dbconn->prepare($sql);
+        $stmt->bindParam(':content', $this->content);
         $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
         return $stmt->execute();
     }
